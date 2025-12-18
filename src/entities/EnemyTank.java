@@ -1,89 +1,102 @@
 package entities;
 
 import world.Map;
+import game.GameLoop;
 import java.util.List;
 import java.util.Random;
 
-public class EnemyTank extends Tank {
+public class EnemyTank extends Tank implements Runnable {
 
-    private Random r = new Random();
+    private final Random r = new Random();
+    private final Thread aiThread;
+
+    private volatile boolean running = true;
 
     private int moveCooldown = 0;
     private int shootCooldown = 0;
 
-    private int steps = 0; 
+    private int steps = 0;
     private int targetSteps = 0;
 
-    public EnemyTank(int x, int y, List<Entity> entities, Map map){
+    public EnemyTank(int x, int y, List<Entity> entities, Map map) {
         super(x, y, entities, map);
+        aiThread = new Thread(this, "EnemyAI-" + hashCode());
+        aiThread.setDaemon(true);
+        aiThread.start();
     }
 
     @Override
-    public void update(boolean hard){
+    public void update(boolean hard) {
         if (moveCooldown > 0) moveCooldown--;
         if (shootCooldown > 0) shootCooldown--;
-
-        if (hard){
-            detectPlayerLine();
-        } else {
-            randomShoot();
-        }
-
-        aiMove();
     }
 
+    @Override
+    public void run() {
+        while (running && !isDestroyed()) {
 
-    private void detectPlayerLine(){
+            if (GameLoop.hardMode) {
+                detectPlayerLine();
+            } else {
+                randomShoot();
+            }
+
+            aiMove();
+
+            sleepAI(60);
+        }
+    }
+
+    private void detectPlayerLine() {
         List<Entity> copy = List.copyOf(entities);
 
-        for (Entity e : copy){
-            if (e instanceof PlayerTank){
+        for (Entity e : copy) {
+            if (e instanceof PlayerTank) {
                 int px = e.getX();
                 int py = e.getY();
 
-                if (px == x){
-                    if (py < y){ dx = 0; dy = -1; }
-                    else{ dx = 0; dy = 1; }
+                if (px == x) {
+                    dx = 0;
+                    dy = py < y ? -1 : 1;
 
-                    if (shootCooldown == 0){
-                        shoot();
-                        shootCooldown = 25;
-                    }
+                    tryShoot();
                 }
 
-                if (py == y){
-                    if (px < x){ dx = -1; dy = 0; }
-                    else{ dx = 1; dy = 0; }
+                if (py == y) {
+                    dx = px < x ? -1 : 1;
+                    dy = 0;
 
-                    if (shootCooldown == 0){
-                        shoot();
-                        shootCooldown = 25;
-                    }
+                    tryShoot();
                 }
             }
         }
     }
 
-    private void randomShoot(){
-        if (shootCooldown == 0){
-            if (r.nextInt(5) == 0){
-                shoot();
-                shootCooldown = 25;
-            }
+    private void randomShoot() {
+        if (shootCooldown == 0 && r.nextInt(5) == 0) {
+            shoot();
+            shootCooldown = 25;
         }
     }
 
-    public void aiMove(){
+    private void tryShoot() {
+        if (shootCooldown == 0) {
+            shoot();
+            shootCooldown = 25;
+        }
+    }
+
+    private void aiMove() {
         if (moveCooldown > 0) return;
 
-        if (steps == 0){
+        if (steps == 0) {
             targetSteps = r.nextInt(5) + 3;
             int d = r.nextInt(4);
 
-            if (d == 0){ dx = 1; dy = 0;  }
-            if (d == 1){ dx = -1; dy = 0; }
-            if (d == 2){ dx = 0; dy = 1;  }
-            if (d == 3){ dx = 0; dy = -1; }
+            if (d == 0) { dx = 1; dy = 0; }
+            if (d == 1) { dx = -1; dy = 0; }
+            if (d == 2) { dx = 0; dy = 1; }
+            if (d == 3) { dx = 0; dy = -1; }
         }
 
         int oldX = x;
@@ -91,17 +104,30 @@ public class EnemyTank extends Tank {
 
         move(dx, dy);
 
-        if (x == oldX && y == oldY){
+        if (x == oldX && y == oldY) {
             steps = 0;
             return;
         }
 
         steps++;
 
-        if (steps >= targetSteps){
+        if (steps >= targetSteps) {
             steps = 0;
         }
 
         moveCooldown = 5;
+    }
+
+    private void sleepAI(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {}
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        boolean destroyed = super.isDestroyed();
+        if (destroyed) running = false;
+        return destroyed;
     }
 }

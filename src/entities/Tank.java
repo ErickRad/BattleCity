@@ -28,7 +28,9 @@ public abstract class Tank extends Entity {
     public void update(boolean hard){}
 
     @Override
-    public boolean blocksMovement(){ return true; }
+    public boolean blocksMovement(){ 
+        return true; 
+    }
 
     @Override
     public boolean blocksBullet(){ return true; }

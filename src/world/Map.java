@@ -84,12 +84,12 @@ public class Map {
     }
 
     private void placeCornerWall(int x, int y) {
-        // vertical
+
         for (int i = 0; i < 3; i++) {
             if (isFree(x, y + i))
                 add(new Brick(x, y + i));
         }
-        // horizontal
+
         for (int i = 0; i < 3; i++) {
             if (isFree(x + i, y))
                 add(new Brick(x + i, y));
@@ -117,6 +117,10 @@ public class Map {
         grid[e.getY()][e.getX()].remove(e);
     }
 
-    public int getWidth(){ return width; }
-    public int getHeight(){ return height; }
+    public int getWidth(){ 
+        return width; 
+    }
+    public int getHeight(){ 
+        return height; 
+    }
 }

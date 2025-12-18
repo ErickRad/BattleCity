@@ -12,11 +12,21 @@ public abstract class Entity {
         this.y = y;
     }
 
-    public int getX(){ return x; }
-    public int getY(){ return y; }
+    public int getX(){ 
+        return x; 
+    }
 
-    public boolean isDestroyed(){ return destroyed; }
-    public void destroy(){ destroyed = true; }
+    public int getY(){ 
+        return y; 
+    }
+
+    public boolean isDestroyed(){ 
+        return destroyed; 
+    }
+
+    public void destroy(){ 
+        destroyed = true; 
+    }
 
     public abstract void update(boolean hard);
 

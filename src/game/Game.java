@@ -1,7 +1,7 @@
 package game;
 
 public class Game {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         GameLoop gameLoop = new GameLoop();
         gameLoop.start();
     }

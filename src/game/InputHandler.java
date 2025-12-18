@@ -9,7 +9,7 @@ public class InputHandler {
     public InputHandler() {
         setRawMode();
 
-        Thread t = new Thread(() -> {
+        Thread inputThread = new Thread(() -> {
             try {
                 while (true) {
                     int c = System.in.read();
@@ -20,8 +20,8 @@ public class InputHandler {
             } catch (IOException ignored) {}
         });
 
-        t.setDaemon(true);
-        t.start();
+        inputThread.setDaemon(true);
+        inputThread.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::restoreTerminal));
     }
@@ -32,7 +32,7 @@ public class InputHandler {
         return k;
     }
 
-   private void setRawMode() {
+    private void setRawMode() {
         try {
             new ProcessBuilder("sh", "-c", "stty -icanon -echo min 1 </dev/tty")
                     .inheritIO()
@@ -50,3 +50,4 @@ public class InputHandler {
         } catch (Exception ignored) {}
     }
 }
+
