@@ -29,7 +29,8 @@ public class GameLoop extends Thread {
     private int tankCount = 2;
 
     public static int kills = 0;
-    public static boolean hardMode = false;
+
+    public static boolean hardMode = true;
 
     public GameLoop() {
         input = new InputHandler();
