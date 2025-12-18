@@ -54,7 +54,6 @@ public abstract class Tank extends Entity {
     }
 
     public void shoot(){
-        Bullet b = new Bullet(x + dx, y + dy, dx, dy, map, entities);
-        entities.add(b);
+        entities.add(new Bullet(x + dx, y + dy, dx, dy, map, entities, this));
     }
 }
